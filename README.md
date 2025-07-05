@@ -4,6 +4,16 @@ An AI-powered educational app that generates safe, factual study materials and Q
 
 ---
 
+## Images
+
+Below are some screenshots of Study Buddy in action:
+
+![Home Page](images/homepage.png)
+![Q&A Example](images/qa-example.png)
+![Study History](images/history.png)
+
+---
+
 ## Features
 
 - 🔐 User registration & login
