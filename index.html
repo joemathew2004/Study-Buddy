@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Welcome Page -->
+    <div id="welcomePage" class="container">
+        <h1><i class="fas fa-graduation-cap"></i> Study Buddy</h1>
+        
+        <!-- Login/Register Tabs -->
+        <div class="auth-tabs">
+            <button id="loginTabBtn" class="auth-tab-button active" onclick="switchAuthTab('login')">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button id="registerTabBtn" class="auth-tab-button" onclick="switchAuthTab('register')">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="loginForm" class="auth-form">
+            <p>Login to access your study materials:</p>
+            
+            <div class="form-group">
+                <label for="loginName"><i class="fas fa-user"></i> Your Name:</label>
+                <input type="text" id="loginName" placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginClass"><i class="fas fa-school"></i> Your Class:</label>
+                <input type="text" id="loginClass" placeholder="e.g., 8th Grade, 10th Standard">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword"><i class="fas fa-lock"></i> Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            
+            <button onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="registerForm" class="auth-form" style="display: none;">
+            <p>Register to create a new account:</p>
+            
+            <div class="form-group">
+                <label for="registerName"><i class="fas fa-user"></i> Your Name:</label>
+                <input type="text" id="registerName" placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="registerClass"><i class="fas fa-school"></i> Your Class:</label>
+                <input type="text" id="registerClass" placeholder="e.g., 8th Grade, 10th Standard">
+            </div>
+            
+            <div class="form-group">
+                <label for="registerPassword"><i class="fas fa-lock"></i> Password:</label>
+                <input type="password" id="registerPassword" placeholder="Create a password">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword"><i class="fas fa-check-circle"></i> Confirm Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            </div>
+            
+            <button onclick="handleRegister()"><i class="fas fa-user-plus"></i> Register</button>
+        </div>
+    </div>
+
+    <!-- Main Application Page (initially hidden) -->
+    <div id="mainPage" style="display: none;">
+        <!-- Sidebar with history -->
+        <div id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-history"></i> Study History</h2>
+            </div>
+            
+            <div id="historyList" class="history-list">
+                <p>No previous queries found.</p>
+            </div>
+            
+            <div class="user-info">
+                <p><i class="fas fa-user-circle"></i> <span id="studentName">Student</span> (<span id="studentClass">Grade</span>)</p>
+                <button onclick="logout()" class="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+        
+        <!-- Main content area -->
+        <div id="mainContent">
+            <div id="topicInputArea">
+                <h1><i class="fas fa-graduation-cap"></i> Study Buddy</h1>
+                <div class="input-container">
+                    <input type="text" id="topicInput" placeholder="Type any topic you want to study..." onkeypress="if(event.key==='Enter') generateStudyMaterial()">
+                    <button onclick="generateStudyMaterial()"><i class="fas fa-magic"></i> Go</button>
+                </div>
+            </div>
+
+            <!-- Fact Box -->
+            <div id="factBox" style="display: none;">
+                <div class="fact-header">
+                    <h3>Did You Know?</h3>
+                    <button onclick="closeFactBox()" class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+                </div>
+                <p id="factContent">Interesting fact will appear here!</p>
+            </div>
+
+            <div id="studyContent">
+                <div id="notesOutput" class="output-section">
+                    <h2><i class="fas fa-book"></i> Notes</h2>
+                    <p>Your notes will appear here...</p>
+                </div>
+
+                <div id="qaOutput" class="output-section">
+                    <h2><i class="fas fa-question-circle"></i> Questions & Answers</h2>
+                    <div id="qaContent">
+                        <p>Questions and answers will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

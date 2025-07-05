@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Welcome Page -->
+    <div id="welcomePage" class="container">
+        <h1><i class="fas fa-graduation-cap"></i> Study Buddy</h1>
+        
+        <!-- Login/Register Tabs -->
+        <div class="auth-tabs">
+            <button id="loginTabBtn" class="auth-tab-button active" onclick="switchAuthTab('login')">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button id="registerTabBtn" class="auth-tab-button" onclick="switchAuthTab('register')">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="loginForm" class="auth-form">
+            <p>Login to access your study materials:</p>
+            
+            <div class="form-group">
+                <label for="loginName"><i class="fas fa-user"></i> Your Name:</label>
+                <input type="text" id="loginName" placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginClass"><i class="fas fa-school"></i> Your Class:</label>
+                <input type="text" id="loginClass" placeholder="e.g., 8th Grade, 10th Standard">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword"><i class="fas fa-lock"></i> Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            
+            <button onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="registerForm" class="auth-form" style="display: none;">
+            <p>Register to create a new account:</p>
+            
+            <div class="form-group">
+                <label for="registerName"><i class="fas fa-user"></i> Your Name:</label>
+                <input type="text" id="registerName" placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="registerClass"><i class="fas fa-school"></i> Your Class:</label>
+                <input type="text" id="registerClass" placeholder="e.g., 8th Grade, 10th Standard">
+            </div>
+            
+            <div class="form-group">
+                <label for="registerPassword"><i class="fas fa-lock"></i> Password:</label>
+                <input type="password" id="registerPassword" placeholder="Create a password">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword"><i class="fas fa-check-circle"></i> Confirm Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            </div>
+            
+            <button onclick="doRegister()"><i class="fas fa-user-plus"></i> Register</button>
+        </div>
+    </div>
+
+    <!-- Main Application Page (initially hidden) -->
+    <div id="mainPage" style="display: none;">
+        <!-- Sidebar with history -->
+        <div id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-history"></i> Study History</h2>
+            </div>
+            
+            <div id="historyList" class="history-list">
+                <p>No previous queries found.</p>
+            </div>
+            
+            <div class="user-info">
+                <p><i class="fas fa-user-circle"></i> <span id="studentName">Student</span> (<span id="studentClass">Grade</span>)</p>
+                <button onclick="doLogout()" class="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+        
+        <!-- Main content area -->
+        <div id="mainContent">
+            <div id="topicInputArea">
+                <h1><i class="fas fa-graduation-cap"></i> Study Buddy</h1>
+                <div class="input-container">
+                    <input type="text" id="topicInput" placeholder="Type any topic you want to study..." onkeypress="if(event.key==='Enter') generateStudyMaterial()">
+                    <button onclick="generateStudyMaterial()" style="width: auto; padding: 0.75rem 1rem;"><i class="fas fa-magic"></i> Go</button>
+                </div>
+            </div>
+
+            <!-- Fact Box -->
+            <div id="factBox" style="display: none;">
+                <div class="fact-header">
+                    <h3>Did You Know?</h3>
+                    <button onclick="closeFactBox()" class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+                </div>
+                <p id="factContent">Interesting fact will appear here!</p>
+            </div>
+
+            <div id="studyContent">
+                <div id="notesOutput" class="output-section">
+                    <h2><i class="fas fa-book"></i> Notes</h2>
+                    <p> </p>
+                </div>
+
+                <div id="qaOutput" class="output-section">
+                    <h2><i class="fas fa-question-circle"></i> Questions & Answers</h2>
+                    <div id="qaContent">
+                        <p> </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = null;
+        const API_URL = 'http://localhost:5000';
+
+        // Function to switch between login and register tabs
+        function switchAuthTab(tabName) {
+            const loginTab = document.getElementById('loginTabBtn');
+            const registerTab = document.getElementById('registerTabBtn');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (tabName === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                loginTab.classList.remove('active');
+                registerTab.classList.add('active');
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+
+        // Function to register a new user
+        async function doRegister() {
+            const name = document.getElementById('registerName').value.trim();
+            const userClass = document.getElementById('registerClass').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            console.log('Register clicked:', { name, userClass, password, confirmPassword });
+            
+            // Basic validation
+            if (!name || !userClass || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            try {
+                console.log('Making registration request...');
+                const response = await fetch(`${API_URL}/api/user/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        name: name,
+                        class: userClass,
+                        password: password
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+
+                alert('Registration successful! You can now log in.');
+                
+                // Switch to login tab and pre-fill the fields
+                switchAuthTab('login');
+                document.getElementById('loginName').value = name;
+                document.getElementById('loginClass').value = userClass;
+                document.getElementById('loginPassword').value = '';
+                
+            } catch (error) {
+                console.error('Error registering user:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Function to login a user
+        async function doLogin() {
+            const name = document.getElementById('loginName').value.trim();
+            const userClass = document.getElementById('loginClass').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // Basic validation
+            if (!name || !userClass || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/user/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        name: name,
+                        class: userClass,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
+                }
+
+                // Store user info
+                currentUserId = data.user_id;
+                
+                // Save to localStorage for auto-login
+                localStorage.setItem('studyBuddyUserId', data.user_id);
+                localStorage.setItem('studyBuddyName', data.name);
+                localStorage.setItem('studyBuddyClass', data.class);
+                
+                // Show main page
+                showMainPage(data.name, data.class);
+                
+                // Load user history
+                loadUserHistory();
+                
+            } catch (error) {
+                console.error('Error logging in:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Function to logout
+        function doLogout() {
+            // Clear stored credentials
+            localStorage.removeItem('studyBuddyUserId');
+            localStorage.removeItem('studyBuddyName');
+            localStorage.removeItem('studyBuddyClass');
+            
+            // Reset current user
+            currentUserId = null;
+            
+            // Show welcome page
+            document.getElementById('welcomePage').style.display = 'block';
+            document.getElementById('mainPage').style.display = 'none';
+            
+            // Clear form fields
+            document.getElementById('loginName').value = '';
+            document.getElementById('loginClass').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerClass').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Switch to login tab
+            switchAuthTab('login');
+        }
+
+        // Function to show the main page
+        function showMainPage(name, userClass) {
+            // Update the user info
+            document.getElementById('studentName').textContent = name;
+            document.getElementById('studentClass').textContent = userClass;
+            
+            // Hide welcome page and show main page
+            document.getElementById('welcomePage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'flex';
+            
+            // Focus on the topic input
+            const topicInput = document.getElementById('topicInput');
+            if (topicInput) topicInput.focus();
+        }
+
+        // Function to load user history
+        async function loadUserHistory() {
+            if (!currentUserId) {
+                console.error('No user ID available');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/history/${currentUserId}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+                
+                const historyData = await response.json();
+                populateHistory(historyData.queries);
+                
+            } catch (error) {
+                console.error('Error loading history:', error);
+                const historyList = document.getElementById('historyList');
+                if (historyList) {
+                    historyList.innerHTML = `<p>Error loading history: ${error.message}</p>`;
+                }
+            }
+        }
+
+        // Function to populate history list
+        function populateHistory(queries) {
+            const historyList = document.getElementById('historyList');
+            if (!historyList) return;
+            
+            if (!queries || queries.length === 0) {
+                historyList.innerHTML = '<p>No previous queries found.</p>';
+                return;
+            }
+            
+            let historyHTML = '';
+            
+            queries.forEach(query => {
+                historyHTML += `
+                    <div class="history-item" onclick="loadHistoryItem('${query.id}', '${query.topic}', \`${query.notes.replace(/`/g, '\\`')}\`, \`${query.qa.replace(/`/g, '\\`')}\`)">
+                        <h3>${query.topic}</h3>
+                    </div>
+                `;
+            });
+            
+            historyList.innerHTML = historyHTML;
+        }
+
+        // Function to load a history item
+        function loadHistoryItem(queryId, topic, notes, qa) {
+            // Format notes with proper paragraph spacing
+            const formattedNotes = notes
+                .split('\n\n')
+                .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+                .join('');
+            
+            // Format Q&A with proper styling
+            const qaContent = document.getElementById('qaContent');
+            if (!qaContent) return;
+            
+            // Extract Q&A pairs using regex
+            const qaRegex = /(\d+\.\s.*?)(?=\d+\.|$)/g;
+            const qaMatches = qa.match(qaRegex);
+            
+            let formattedQA = '';
+            if (qaMatches) {
+                formattedQA = qaMatches.map((qaItem, index) => {
+                    // Split question and answer
+                    const parts = qaItem.split(/\nAnswer:/i);
+                    if (parts.length === 2) {
+                        const question = parts[0].trim();
+                        const answer = parts[1].trim();
+                        return `
+                            <div class="qa-item" style="background-color: #f0f7ff; border-left: 6px solid #4361ee; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 25px; border-radius: 10px;">
+                                <div class="qa-question" style="color: #2c4bdb; font-size: 1.2rem; border-bottom: 2px solid #d1e6ff; padding-bottom: 12px; margin-bottom: 15px;">${question}</div>
+                                <div class="qa-answer" style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">${answer}</div>
+                            </div>
+                        `;
+                    } else {
+                        return `<div class="qa-item" style="background-color: #f0f7ff; border-left: 6px solid #4361ee; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 25px; border-radius: 10px;">${qaItem.replace(/\n/g, '<br>')}</div>`;
+                    }
+                }).join('');
+            } else {
+                formattedQA = `<p>${qa.replace(/\n/g, '<br>')}</p>`;
+            }
+            
+            const notesOutput = document.getElementById('notesOutput');
+            if (notesOutput) {
+                notesOutput.innerHTML = `<h2><i class="fas fa-book"></i> Notes</h2>${formattedNotes}`;
+            }
+            
+            if (qaContent) {
+                qaContent.innerHTML = formattedQA;
+            }
+            
+            // Update the topic input
+            const topicInput = document.getElementById('topicInput');
+            if (topicInput) {
+                topicInput.value = topic;
+            }
+            
+            // Hide fact box for history items
+            const factBox = document.getElementById('factBox');
+            if (factBox) factBox.style.display = 'none';
+        }
+
+        // Function to generate study material
+        async function generateStudyMaterial() {
+            const topicInput = document.getElementById('topicInput');
+            if (!topicInput) {
+                console.error('Topic input element not found');
+                return;
+            }
+            
+            const topic = topicInput.value;
+            const notesOutput = document.getElementById('notesOutput');
+            const qaContent = document.getElementById('qaContent');
+            
+            if (!notesOutput || !qaContent) {
+                console.error('Output elements not found');
+                return;
+            }
+
+            if (!topic) {
+                alert('Please enter a topic!');
+                return;
+            }
+
+            // Show loading messages
+            notesOutput.innerHTML = '<h2><i class="fas fa-book"></i> Notes</h2><div style="text-align: center; padding: 2rem;"><div class="loading-spinner"></div><p style="margin-top: 1rem;">Generating notes... Please wait, this might take a few moments.</p></div>';
+            qaContent.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="loading-spinner"></div><p style="margin-top: 1rem;">Generating questions and answers...</p></div>';
+
+            try {
+                // Call our backend server
+                const response = await fetch(`${API_URL}/api/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        topic: topic,
+                        user_id: currentUserId
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    
+                    // Special handling for inappropriate content or unknown person (403)
+                    if (response.status === 403 && (errorData.error === "Inappropriate content" || errorData.error === "Unknown person")) {
+                        notesOutput.innerHTML = `<h2><i class="fas fa-exclamation-triangle"></i> Notice</h2><p>${errorData.notes}</p>`;
+                        qaContent.innerHTML = `<div class="qa-item" style="border-left-color: #f87171;"><p>${errorData.message}</p></div>`;
+                        
+                        // Hide fact box for inappropriate content
+                        const factBox = document.getElementById('factBox');
+                        if (factBox) factBox.style.display = 'none';
+                        
+                        return; // Exit early
+                    }
+                    
+                    throw new Error(`API Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                console.log(data);
+
+                // Format notes with proper paragraph spacing
+                const formattedNotes = data.notes
+                    .split('\n\n')
+                    .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+                    .join('');
+                
+                // Format Q&A with proper styling
+                const qaRegex = /(\d+\.\s.*?)(?=\d+\.|$)/g;
+                const qaMatches = data.qa.match(qaRegex);
+                
+                let formattedQA = '';
+                if (qaMatches) {
+                    formattedQA = qaMatches.map((qa, index) => {
+                        // Split question and answer
+                        const parts = qa.split(/\nAnswer:/i);
+                        if (parts.length === 2) {
+                            const question = parts[0].trim();
+                            const answer = parts[1].trim();
+                            return `
+                                <div class="qa-item" style="background-color: #f0f7ff; border-left: 6px solid #4361ee; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 25px; border-radius: 10px;">
+                                    <div class="qa-question" style="color: #2c4bdb; font-size: 1.2rem; border-bottom: 2px solid #d1e6ff; padding-bottom: 12px; margin-bottom: 15px;">${question}</div>
+                                    <div class="qa-answer" style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">${answer}</div>
+                                </div>
+                            `;
+                        } else {
+                            return `<div class="qa-item" style="background-color: #f0f7ff; border-left: 6px solid #4361ee; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 25px; border-radius: 10px;">${qa.replace(/\n/g, '<br>')}</div>`;
+                        }
+                    }).join('');
+                } else {
+                    formattedQA = `<p>${data.qa.replace(/\n/g, '<br>')}</p>`;
+                }
+                
+                notesOutput.innerHTML = `<h2><i class="fas fa-book"></i> Notes</h2>${formattedNotes}`;
+                qaContent.innerHTML = formattedQA;
+                
+                // Show the interesting fact
+                showFact(data.fact);
+                
+                // Reload history to include the new query ONLY if content was generated successfully
+                if (data.id) {
+                    setTimeout(loadUserHistory, 500);
+                }
+
+            } catch (error) {
+                console.error('Error fetching AI data:', error);
+                notesOutput.innerHTML = `<h2><i class="fas fa-exclamation-triangle"></i> Error</h2><p>Error generating notes: ${error.message}. Please check your network connection and ensure the backend server is running.</p>`;
+                qaContent.innerHTML = `<div class="qa-item" style="border-left-color: #f87171;"><p>Error generating Q&A: ${error.message}.</p></div>`;
+                
+                // Hide fact box on error
+                const factBox = document.getElementById('factBox');
+                if (factBox) factBox.style.display = 'none';
+            }
+        }
+
+        // Function to show a fact about the topic
+        function showFact(fact) {
+            const factBox = document.getElementById('factBox');
+            const factContent = document.getElementById('factContent');
+            
+            if (!factBox || !factContent) return;
+            
+            if (fact && fact.trim() !== '') {
+                factContent.textContent = fact;
+                factBox.style.display = 'block';
+            } else {
+                factBox.style.display = 'none';
+            }
+        }
+
+        // Function to close the fact box
+        function closeFactBox() {
+            const factBox = document.getElementById('factBox');
+            if (factBox) {
+                factBox.style.display = 'none';
+            }
+        }
+
+        // Auto-login on page load
+        window.addEventListener('load', function() {
+            const storedUserId = localStorage.getItem('studyBuddyUserId');
+            const storedName = localStorage.getItem('studyBuddyName');
+            const storedClass = localStorage.getItem('studyBuddyClass');
+            
+            if (storedUserId && storedName && storedClass) {
+                currentUserId = storedUserId;
+                showMainPage(storedName, storedClass);
+                loadUserHistory();
+            }
+        });
+    </script>
+</body>
+</html>
