@@ -12,6 +12,17 @@ Below are some screenshots of Study Buddy in action:
 ![Notes Generated](images/Notes%20Generation.png)
 ![Q&A Example](images/Q%20and%20A.png)
 
+<table>
+  <tr>
+    <td><img src="images/Register.png" alt="Home Page" width="300"/></td>
+    <td><img src="images/images/Register.png" alt="Q&A Example" width="300"/></td>
+  </tr>
+  <tr>
+    <td><img src="images/Notes%20Generation.png" alt="Study History" width="300"/></td>
+    <td><img src="imagesNotes%20Generation.png" alt="Fourth Screenshot" width="300"/></td>
+  </tr>
+</table>
+
 ---
 
 ## Features
