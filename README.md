@@ -8,9 +8,10 @@ An AI-powered educational app that generates safe, factual study materials and Q
 
 Below are some screenshots of Study Buddy in action:
 
-<img src="images/Register.png" alt="Home Page" width="400"/>
-<img src="images/Q%20and%20A.png" alt="Q&A Example" width="400"/>
-<img src="images/Notes%20Generation.png" alt="Study History" width="400"/>
+![Home Page](images/Register.png)
+![Notes Generated](images/Notes%20Generation.png)
+![Q&A Example](images/Q%20and%20A.png)
+
 ---
 
 ## Features
