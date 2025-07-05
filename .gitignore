@@ -13,6 +13,7 @@ __pycache__/
 .Python
 venv/
 env/
+venvv/
 ENV/
 
 # IDE
