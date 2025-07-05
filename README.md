@@ -10,7 +10,7 @@ Below are some screenshots of Study Buddy in action:
 
 ![Home Page](images/Register.png)
 ![Notes Generated](images/Notes%20Generation.png)
-![Q&A Example]('images/Q%20and%20A.png')
+![Q&A Example](images/Q%20and%20A.png)
 
 ---
 
